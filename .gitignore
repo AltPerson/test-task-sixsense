@@ -1,0 +1,28 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Written by the CLI
+/samples/
+/fixtures/
+/backend/samples/
+/backend/fixtures/
+
+# Local environment
+.env
+.env.*
+!.env.example
+*.local
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
