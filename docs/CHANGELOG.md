@@ -2,6 +2,11 @@
 
 Milestone-level entries only. Newest first.
 
+## Server-side authentication foundation
+- Added an in-memory opaque-session store with per-session single-flight token refresh.
+- Added an explicit backend auth client and login, logout, and profile BFF routes with secure cookie handling.
+- Added normalized domain, validation, network, and Retry-After errors plus concurrency and cleanup tests.
+
 ## Frontend baseline and scaffold
 - Added a Next.js App Router, TypeScript, and Tailwind frontend foundation with a TanStack Query provider.
 - Added reproducible OpenAPI TypeScript generation plus lint, typecheck, Vitest, and production build commands.

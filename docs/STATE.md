@@ -12,7 +12,7 @@ Keep this file short. Replace stale facts instead of appending a diary.
 ## Chosen architecture
 - Frontend target: Next.js App Router + TypeScript in `frontend/`.
 - Browser authentication: opaque app-session cookie only.
-- Backend tokens: server-side SessionStore only.
+- Backend tokens: process-global in-memory SessionStore only; multi-instance deployments require a shared store.
 - Search UI: metadata-driven filter builder, URL-reproducible search definition, progressive paging, virtualized table.
 - Investigation UX: stable session links plus lightweight source/destination pivots.
 - Dedicated protocol view: DNS unless explicitly changed.
@@ -26,21 +26,23 @@ Keep this file short. Replace stale facts instead of appending a diary.
 - During T8, all backend source/tests are off-limits; investigate through the application only.
 
 ## Active task
-T1 — BFF session/auth foundation.
+Human review gate after T1 — BFF session/auth foundation.
 
 ## Known blockers
-None.
+- The supplied backend Docker build currently fails because `backend/Dockerfile` copies a missing `backend/README.md`; real-backend auth smoke testing remains pending.
 
 ## Verification status
 - API type generation: reproducible from `backend/openapi.json`
 - dev server: HTTP 200 with application shell
 - lint: passing
 - typecheck: passing
-- tests: 1 passing shell smoke test
+- tests: 6 passing, including proactive single-flight refresh, reactive 401 refresh/retry, and refresh-auth cleanup
 - build: passing
-- manual HAR token check: not run
+- BFF auth smoke test: login, `/api/me`, and logout passing against a contract-shaped mock backend
+- browser-visible token check: mock backend tokens absent from login and `/api/me` responses; cookie is opaque, HttpOnly, SameSite=Lax, Path=/
+- manual browser HAR token check against the supplied backend: not run
 - search permalink round-trip: not implemented
 - forensic investigation: blocked until T1–T7
 
 ## Next action
-Execute T1 only, then stop at the mandatory auth/session human review gate.
+Human reviews the T1 session/token boundary, cookie behavior, and refresh concurrency. After explicit approval, execute T2 only.

@@ -28,7 +28,7 @@ Suggested commit: `chore: scaffold frontend and api types`
 ---
 
 ## T1 — BFF session/auth foundation
-Status: TODO
+Status: DONE
 
 Read: `docs/ARCHITECTURE.md` (Session store, Backend client), `docs/API_NOTES.md` (Auth)
 
