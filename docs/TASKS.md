@@ -3,7 +3,7 @@
 Work top to bottom. Complete one task at a time. Optional tasks stay blocked until core is green.
 
 ## T0 — Baseline and scaffold
-Status: TODO
+Status: DONE
 
 Goal: create the smallest frontend foundation without touching backend code.
 

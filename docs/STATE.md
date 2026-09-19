@@ -26,19 +26,21 @@ Keep this file short. Replace stale facts instead of appending a diary.
 - During T8, all backend source/tests are off-limits; investigate through the application only.
 
 ## Active task
-T0 — Baseline and scaffold.
+T1 — BFF session/auth foundation.
 
 ## Known blockers
 None.
 
 ## Verification status
-- lint: not yet available
-- typecheck: not yet available
-- tests: not yet available
-- build: not yet available
+- API type generation: reproducible from `backend/openapi.json`
+- dev server: HTTP 200 with application shell
+- lint: passing
+- typecheck: passing
+- tests: 1 passing shell smoke test
+- build: passing
 - manual HAR token check: not run
 - search permalink round-trip: not implemented
 - forensic investigation: blocked until T1–T7
 
 ## Next action
-Execute T0 only, verify it, update this file, then stop unless autonomous continuation was explicitly requested.
+Execute T1 only, then stop at the mandatory auth/session human review gate.

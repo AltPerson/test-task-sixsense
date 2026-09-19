@@ -2,6 +2,11 @@
 
 Milestone-level entries only. Newest first.
 
+## Frontend baseline and scaffold
+- Added a Next.js App Router, TypeScript, and Tailwind frontend foundation with a TanStack Query provider.
+- Added reproducible OpenAPI TypeScript generation plus lint, typecheck, Vitest, and production build commands.
+- Added a server-only backend URL example, frontend artifact ignores, and a tested application shell.
+
 ## Human-control and review-gate update
 - Made Git history/remotes explicitly human-owned; agent may inspect Git but must not stage/commit/push/change remotes without an exact user request.
 - Added strict one-task completion reports, dependency/refactor scope guardrails, and no-silent-suppression rules.

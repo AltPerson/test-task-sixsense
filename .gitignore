@@ -20,6 +20,14 @@ htmlcov/
 !.env.example
 *.local
 
+# Frontend
+/frontend/node_modules/
+/frontend/.next/
+/frontend/out/
+/frontend/build/
+/frontend/coverage/
+/frontend/*.tsbuildinfo
+
 # Editors / OS
 .DS_Store
 Thumbs.db
