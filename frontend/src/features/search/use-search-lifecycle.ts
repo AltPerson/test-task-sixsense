@@ -206,9 +206,14 @@ export function useSearchLifecycle() {
 
     setReleaseError(null);
     setPhase("releasing");
-    await queryClient.cancelQueries({
-      queryKey: ["search-job", activeSearchId],
-    });
+    await Promise.all([
+      queryClient.cancelQueries({
+        queryKey: ["search-job", activeSearchId],
+      }),
+      queryClient.cancelQueries({
+        queryKey: ["search-results", activeSearchId],
+      }),
+    ]);
 
     try {
       await releaseSearchJob(activeSearchId);
@@ -232,6 +237,7 @@ export function useSearchLifecycle() {
   return {
     phase,
     job,
+    searchId,
     submissionQuery,
     createError,
     releaseError,

@@ -4,6 +4,7 @@ import type { SearchMetadata } from "@/features/search/metadata";
 import {
   buildSearchCreate,
   createCaptureAwareSearchDefinition,
+  createHostPivotDefinition,
   decodeSearchDefinition,
   encodeSearchDefinition,
   type SearchDefinition,
@@ -101,6 +102,46 @@ describe("default search definition", () => {
       from: "2024-05-20T11:00:00.000Z",
       to: "2024-05-20T12:00:00.000Z",
     });
+  });
+});
+
+describe("host pivots", () => {
+  it("preserves the search context and adds a metadata-supported IP condition", () => {
+    const pivotMetadata: SearchMetadata = {
+      ...metadata,
+      fields: [
+        ...metadata.fields,
+        {
+          name: "src.ip",
+          label: "Source IP",
+          type: "ip",
+          operators: ["eq", "cidr"],
+          example: "192.0.2.1",
+        },
+      ],
+    };
+
+    expect(
+      createHostPivotDefinition(
+        definition,
+        pivotMetadata,
+        "src",
+        "192.0.2.44",
+      ),
+    ).toEqual({
+      ...definition,
+      sensorIds: ["sensor-b", "sensor-a"],
+      conditions: [
+        ...definition.conditions,
+        { field: "src.ip", operator: "eq", values: ["192.0.2.44"] },
+      ],
+    });
+  });
+
+  it("does not invent a pivot when metadata does not support it", () => {
+    expect(
+      createHostPivotDefinition(definition, metadata, "dst", "192.0.2.44"),
+    ).toBeNull();
   });
 });
 

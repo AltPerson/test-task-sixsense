@@ -2,6 +2,12 @@
 
 Milestone-level entries only. Newest first.
 
+## Progressive search results and host pivots
+- Added an authenticated results BFF route plus a pure bounded accumulator for cursor progression, caught-up tail polling, string-ID deduplication, and stale-job isolation.
+- Added a metadata-driven TanStack Table with virtualized rows, column selection, progressive/empty/error states, and safe fallback rendering for unexpected values.
+- Added completion-gated backend sorting, preserved string session IDs behind a non-interactive pre-T6 placeholder, and source/destination IP pivots that prepare reproducible search definitions without starting jobs.
+- Added a fresh bounded terminal-tail budget, explicit manual recovery for unconfirmed result endings, redacted-pivot suppression, and deterministic coverage for continuation, deduplication, completion, sorting conflicts, races, malformed/redacted rows, and pivot serialization, plus real-backend browser verification.
+
 ## Asynchronous search lifecycle
 - Added authenticated create, progress, and delete BFF routes without exposing backend credentials.
 - Added stable per-submission idempotency keys retained across bounded automatic and explicit manual recovery attempts, request timeouts, and bounded polling with Retry-After support.

@@ -14,7 +14,7 @@ Keep this file short. Replace stale facts instead of appending a diary.
 - Browser authentication: opaque app-session cookie only.
 - Backend tokens: process-global in-memory SessionStore only; multi-instance deployments require a shared store.
 - Search UI: metadata-driven filter builder, URL-reproducible search definition, progressive paging, virtualized table.
-- Investigation UX: stable session links plus lightweight source/destination pivots.
+- Investigation UX: lightweight source/destination pivots; result rows retain string session IDs for stable detail links when T6 implements that route.
 - Dedicated protocol view: DNS unless explicitly changed.
 
 ## Human-control rules
@@ -26,7 +26,7 @@ Keep this file short. Replace stale facts instead of appending a diary.
 - During T8, all backend source/tests are off-limits; investigate through the application only.
 
 ## Active task
-T4 complete — asynchronous search lifecycle awaiting mandatory human review.
+T5 complete — progressive search results and host pivots awaiting human review.
 
 ## Known blockers
 - Docker startup is not currently usable because the Docker Desktop engine is unavailable. Independently, `backend/Dockerfile` and the backend package metadata reference the missing supplied `backend/README.md`, so both the image build and a normal project install remain defective without changing supplied backend files.
@@ -44,7 +44,7 @@ T4 complete — asynchronous search lifecycle awaiting mandatory human review.
 - dev server: HTTP 200 with application shell
 - lint: passing
 - typecheck: passing
-- tests: 53 passing, including idempotency reuse across automatic and manual recovery, ambiguous failures, timeouts, bounded polling, lifecycle races, rejected best-effort cleanup, enum retry timing, account isolation, and URL navigation
+- tests: 70 passing, including progressive cursor/tail semantics, terminal-tail recovery, string-ID deduplication, stale-job isolation, sort conflicts, malformed/redacted values, host pivots, idempotency recovery, lifecycle races, account isolation, and URL navigation
 - build: passing
 - Direct supplied-backend smoke: health, login, profile, sensors, fields, columns, enum, logout, and post-logout rejection passed; observed 200, 204, 401, 404, 422, and recoverable 503 with `Retry-After`.
 - Real-backend refresh: two consecutive access expiries under `CAP_ACCESS_TTL_S=15` each produced exactly one successful refresh; parallel authenticated requests then succeeded, confirming single-flight refresh and rotated refresh-token persistence.
@@ -57,7 +57,9 @@ T4 complete — asynchronous search lifecycle awaiting mandatory human review.
 - T4 real browser verification: one search moved from queued through running to done, polling stopped at done, `sensor_lagging` rendered, the retained slot was released with DELETE, and rerunning the same deep link created a fresh job without exposing a job id in the URL.
 - T4 real API verification: repeating one idempotency key returned 200 with `Idempotent-Replayed: true` and the same search id; three retained searches filled the documented limit, a fourth returned 429, and all three were explicitly deleted.
 - Unresolved submissions are retained only in the mounted browser workspace. A retry uses the original key and exact serialized body; abandoning one permits a genuinely new submission and key. Reload, navigation away, tab closure, network failure, or process termination can lose an unresolved key or prevent best-effort DELETE, so slot cleanup is not guaranteed without a returned job id.
+- T5 mock verification: cursor progression, caught-up tail rechecking, a fresh bounded tail budget after transition to `done`, explicit incomplete-results recovery, manual continuation/deduplication, final completion, 64-bit string-ID deduplication, 409 sort recovery, stale responses across jobs, malformed/redacted/legacy value rendering, redacted-pivot suppression, host-pivot serialization, and result-query cancellation passed. Accumulation stops at a documented 25,000-row client safety limit.
+- T5 real browser verification: a review smoke search loaded 3,252 rows through progressive cursor pages, reached `done`, showed the non-interactive session-detail placeholder with string IDs, and rendered only a virtualized subset of rows. Source-IP pivot URLs retained the search context, the retained job was explicitly deleted with a 204 response, and the browser session was signed out. Deterministic mocks cover terminal timing and redaction because those cases were not deliberately induced against the supplied backend.
 - forensic investigation: blocked until T1–T7
 
 ## Next action
-Human reviews T4 idempotency lifetime, retry behavior, lifecycle termination, and cleanup. After explicit approval, execute T5 only; do not start the progressive results table before then.
+Human reviews T5 progressive paging, tail semantics, virtualization, sorting, and host pivots. After approval, execute T6 only; do not start session detail before then.

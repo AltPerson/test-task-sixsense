@@ -144,7 +144,7 @@ Suggested commit: `feat: orchestrate asynchronous searches`
 ---
 
 ## T5 — Progressive paged results + virtualized table + investigation pivots
-Status: TODO
+Status: DONE
 
 Read: `docs/ARCHITECTURE.md` Search state model / Results table / Investigation pivots
 
@@ -158,7 +158,7 @@ Work:
 - TanStack Table + Virtual;
 - sticky header and usable dense row layout;
 - alternate server sorting only after job is `done`;
-- make row/session navigation preserve a stable `/sessions/{id}` destination;
+- preserve string session IDs for the stable `/sessions/{id}` destination implemented in T6, without exposing a broken link before that route exists;
 - add cheap analyst pivots from useful row values (at least source IP and destination IP) into a new/reconstructed search URL when metadata supports those fields.
 
 Acceptance:
@@ -171,7 +171,7 @@ Acceptance:
 - after done, server sort resets paging and returns globally sorted rows;
 - unit test explicitly covers caught-up tail + duplicate merge + later continuation;
 - a reviewer can pivot from a source/destination value into a reproducible host-focused search without manually rebuilding every condition;
-- row/session links never coerce a session id to number.
+- retained row/session IDs are never coerced to numbers.
 
 Suggested commit: `feat: stream paged search results into virtual table`
 

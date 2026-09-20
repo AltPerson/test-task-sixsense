@@ -5,6 +5,10 @@ import {
   type SearchMetadata,
 } from "@/features/search/metadata";
 import { isSearchJob, type SearchJob } from "@/features/search/search-job";
+import {
+  isSearchResultsPage,
+  type SearchResultsPage,
+} from "@/features/search/search-results";
 import type { components } from "@/generated/api";
 import {
   readPublicApiError,
@@ -258,6 +262,26 @@ export function fetchSearchJob(
     `/api/searches/${encodeURIComponent(searchId)}`,
     isSearchJob,
     "Search progress could not be loaded.",
+    { method: "GET" },
+    options,
+  );
+}
+
+export function fetchSearchResults(
+  searchId: string,
+  cursor: string | null,
+  sort: components["schemas"]["SortKey"],
+  options: SearchRequestOptions = {},
+): Promise<SearchResultsPage> {
+  const parameters = new URLSearchParams({ sort });
+  if (cursor !== null) {
+    parameters.set("cursor", cursor);
+  }
+
+  return requestSearchJson(
+    `/api/searches/${encodeURIComponent(searchId)}/results?${parameters.toString()}`,
+    isSearchResultsPage,
+    "Search results could not be loaded.",
     { method: "GET" },
     options,
   );

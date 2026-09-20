@@ -7,6 +7,7 @@ import { useState, type FormEvent } from "react";
 import { ConditionEditor } from "@/features/search/condition-editor";
 import { fetchSearchMetadata } from "@/features/search/search-api";
 import { SearchLifecyclePanel } from "@/features/search/search-lifecycle-panel";
+import { SearchResultsTable } from "@/features/search/search-results-table";
 import type { SearchMetadata } from "@/features/search/metadata";
 import {
   buildSearchCreate,
@@ -120,6 +121,12 @@ function SearchBuilderFromUrl({ metadata }: { metadata: SearchMetadata }) {
         phase={lifecycle.phase}
         progressError={lifecycle.progressError}
         releaseError={lifecycle.releaseError}
+      />
+      <SearchResultsTable
+        job={lifecycle.job}
+        metadata={metadata}
+        searchId={lifecycle.searchId}
+        submissionQuery={lifecycle.submissionQuery}
       />
     </div>
   );

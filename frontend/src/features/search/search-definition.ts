@@ -128,6 +128,29 @@ export function encodeSearchDefinition(definition: SearchDefinition): string {
   });
 }
 
+export function createHostPivotDefinition(
+  definition: SearchDefinition,
+  metadata: SearchMetadata,
+  direction: "src" | "dst",
+  ip: string,
+): SearchDefinition | null {
+  const fieldName = `${direction}.ip`;
+  const field = metadata.fields.find((candidate) => candidate.name === fieldName);
+
+  if (!field?.operators.includes("eq") || ip.length === 0) {
+    return null;
+  }
+
+  return {
+    ...definition,
+    sensorIds: [...definition.sensorIds],
+    conditions: [
+      ...definition.conditions.filter((condition) => condition.field !== fieldName),
+      { field: fieldName, operator: "eq", values: [ip] },
+    ],
+  };
+}
+
 export function decodeSearchDefinition(value: string): SearchDefinitionResult {
   let parsed: unknown;
 

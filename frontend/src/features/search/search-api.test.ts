@@ -4,6 +4,7 @@ import {
   createSearchJob,
   createSearchSubmission,
   fetchEnumCatalog,
+  fetchSearchResults,
   releaseSearchJob,
   SearchApiError,
   searchPollRetryDelay,
@@ -299,5 +300,25 @@ describe("search job requests", () => {
     expect(searchPollRetryDelay(0, transient)).toBe(3_000);
     expect(searchPollRetryDelay(0, rateLimited)).toBe(2_000);
     expect(searchPollRetryDelay(2, new Error("unknown"))).toBe(4_000);
+  });
+
+  it("surfaces a running-search sort conflict instead of returning empty results", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      Response.json(
+        {
+          error: {
+            code: "search_running",
+            message: "Alternate sorting requires a finished search.",
+          },
+        },
+        { status: 409 },
+      ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      fetchSearchResults("search-1", null, "-risk"),
+    ).rejects.toMatchObject({ status: 409, code: "search_running" });
+    expect(fetchMock).toHaveBeenCalledOnce();
   });
 });
