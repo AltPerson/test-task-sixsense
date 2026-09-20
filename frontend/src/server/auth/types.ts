@@ -1,4 +1,5 @@
 import type { components } from "@/generated/api";
+import { isRecord } from "@/lib/validation";
 
 export type LoginCredentials = components["schemas"]["LoginRequest"];
 export type TokenPair = components["schemas"]["TokenPair"];
@@ -11,10 +12,6 @@ export type SessionRecord = {
   refreshExpiresAt: number;
   profile: UserProfile;
 };
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");

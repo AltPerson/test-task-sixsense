@@ -46,6 +46,7 @@ export class InMemorySessionStore implements SessionStore {
       return null;
     }
 
+    // The refresh lifetime is the maximum local session lifetime.
     if (session.refreshExpiresAt <= this.now()) {
       this.sessions.delete(sid);
       return null;
@@ -74,6 +75,8 @@ export class InMemorySessionStore implements SessionStore {
       return activeRefresh;
     }
 
+    // Refresh tokens are single-use, so concurrent callers must share the exact
+    // same promise rather than queue independent rotations.
     const refreshPromise = refresh().finally(() => {
       if (this.refreshes.get(sid) === refreshPromise) {
         this.refreshes.delete(sid);

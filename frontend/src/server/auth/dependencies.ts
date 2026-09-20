@@ -8,7 +8,9 @@ const globalSessions = globalThis as typeof globalThis & {
   trafficAnalysisSessionStore?: InMemorySessionStore;
 };
 
-// This is process-global only; multi-instance deployments require a shared store.
+// Route modules can be evaluated independently, so one process-global store keeps
+// their opaque session IDs coherent. Horizontal deployments still require Redis
+// or another shared store because globalThis is isolated per Node.js process.
 export const sessionStore =
   (globalSessions.trafficAnalysisSessionStore ??= new InMemorySessionStore());
 

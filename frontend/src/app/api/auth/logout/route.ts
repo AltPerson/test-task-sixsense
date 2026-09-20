@@ -20,6 +20,8 @@ export async function POST() {
   } catch (error) {
     response = errorResponse(error);
   } finally {
+    // A resolved BFF response always means the local session was cleared, even
+    // when upstream revocation failed and the response itself is an error.
     if (sid) {
       await sessionStore.delete(sid);
     }

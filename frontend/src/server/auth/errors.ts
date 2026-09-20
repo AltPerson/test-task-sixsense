@@ -1,5 +1,7 @@
 import "server-only";
 
+import { isRecord } from "@/lib/validation";
+
 export type ValidationIssue = {
   location: Array<string | number>;
   message: string;
@@ -26,10 +28,6 @@ export class AppError extends Error {
     this.retryAfterSeconds = options.retryAfterSeconds;
     this.issues = options.issues;
   }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function normalizeValidationIssues(value: unknown): ValidationIssue[] | null {
@@ -102,6 +100,9 @@ export async function errorFromBackendResponse(
     );
   }
 
+  // The backend intentionally has both domain-error and FastAPI validation
+  // envelopes. Normalize them without forwarding validation input values, which
+  // could contain submitted credentials.
   if (isRecord(body) && typeof body.detail === "string") {
     return new AppError(
       response.status,

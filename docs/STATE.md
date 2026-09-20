@@ -26,7 +26,7 @@ Keep this file short. Replace stale facts instead of appending a diary.
 - During T8, all backend source/tests are off-limits; investigate through the application only.
 
 ## Active task
-Human review gate after T1 — BFF session/auth foundation.
+Human review gate after T2 — sign-in, authenticated shell, and auth cleanup.
 
 ## Known blockers
 - The supplied backend Docker build currently fails because `backend/Dockerfile` copies a missing `backend/README.md`; real-backend auth smoke testing remains pending.
@@ -36,13 +36,14 @@ Human review gate after T1 — BFF session/auth foundation.
 - dev server: HTTP 200 with application shell
 - lint: passing
 - typecheck: passing
-- tests: 6 passing, including proactive single-flight refresh, reactive 401 refresh/retry, and refresh-auth cleanup
+- tests: 13 passing, including rejected-logout retry and preserved rate-limit cooldown regressions
 - build: passing
 - BFF auth smoke test: login, `/api/me`, and logout passing against a contract-shaped mock backend
 - browser-visible token check: mock backend tokens absent from login and `/api/me` responses; cookie is opaque, HttpOnly, SameSite=Lax, Path=/
+- browser sign-in flow: analyst/observer, invalid credentials, HTTP-date rate limit countdown, route protection, narrow layout, and logout passing against a contract-shaped mock backend
 - manual browser HAR token check against the supplied backend: not run
 - search permalink round-trip: not implemented
 - forensic investigation: blocked until T1–T7
 
 ## Next action
-Human reviews the T1 session/token boundary, cookie behavior, and refresh concurrency. After explicit approval, execute T2 only.
+Human reviews the focused T1–T2 cleanup and regression coverage. After explicit approval, execute T3 only.

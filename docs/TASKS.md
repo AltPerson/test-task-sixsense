@@ -56,7 +56,7 @@ Suggested commit: `feat: add server-side session bff`
 ---
 
 ## T2 — Sign-in screen and authenticated shell
-Status: TODO
+Status: DONE
 
 Work:
 - sign-in form with email/password;

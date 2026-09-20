@@ -179,6 +179,15 @@ The following milestones require a human review before the next task begins, eve
 - Never log credentials or token values.
 - Do not log full decoded payloads by default.
 
+## Code organization and comments
+- Organize code by feature and cohesive responsibility; keep feature-specific helpers and types beside the feature that owns their semantics.
+- Promote a helper to shared code only when multiple call sites genuinely use the same behavior and runtime boundary.
+- Preserve Next.js server/client boundaries explicitly; server-only credentials, sessions, and backend clients must never enter client bundles.
+- Avoid speculative layers, excessive file fragmentation, broad refactors, and abstractions without a current requirement.
+- Use concise English comments to explain non-obvious algorithms, concurrency safeguards, security invariants, and business decisions.
+- Do not comment trivial assignments, ordinary control flow, self-explanatory JSX, or obvious getters.
+- Apply these conventions incrementally to active work; do not repeatedly refactor already accepted code without a concrete finding.
+
 
 ## Git ownership
 Git history and remote operations are human-controlled.

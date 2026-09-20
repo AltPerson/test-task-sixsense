@@ -26,6 +26,7 @@ export async function POST(request: Request) {
 
     const tokens = await backendClient.login(body);
     const sid = await sessionStore.create(tokens);
+    // Only the profile and opaque sid cross the BFF boundary; token fields never do.
     const response = NextResponse.json({ user: tokens.user });
     setSessionCookie(response, sid);
     return response;

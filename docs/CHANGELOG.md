@@ -2,6 +2,12 @@
 
 Milestone-level entries only. Newest first.
 
+## Secure sign-in and authenticated shell
+- Added an accessible sign-in screen with explicit analyst and observer demo-account fill actions.
+- Added pending, invalid-credential, backend-unavailable, and rate-limit countdown states.
+- Added server-side route protection, current-user/role presentation, and logout navigation.
+- Separated client auth transport from form rendering, preserved active cooldowns, and made rejected logout requests retryable without false navigation.
+
 ## Server-side authentication foundation
 - Added an in-memory opaque-session store with per-session single-flight token refresh.
 - Added an explicit backend auth client and login, logout, and profile BFF routes with secure cookie handling.

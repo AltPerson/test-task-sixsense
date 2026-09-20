@@ -105,6 +105,7 @@ export class BackendClient {
   ): Promise<T> {
     let session = await this.requireSession(sid);
 
+    // Refresh slightly early so a token does not expire while a request is in flight.
     if (this.isAccessExpiring(session)) {
       session = await this.refreshSession(sid, session.accessToken);
     }
@@ -112,6 +113,7 @@ export class BackendClient {
     let response = await this.authorizedRequest(path, session.accessToken);
 
     if (response.status === 401) {
+      // A protected request gets one reactive refresh and one retry, never a loop.
       session = await this.refreshSession(sid, session.accessToken);
       response = await this.authorizedRequest(path, session.accessToken);
 
@@ -146,6 +148,8 @@ export class BackendClient {
     return this.sessions.withRefreshLock(sid, async () => {
       const current = await this.requireSession(sid);
 
+      // Another request may have rotated the single-use refresh token while this
+      // caller waited for the lock. Reuse its result instead of rotating again.
       if (current.accessToken !== observedAccessToken) {
         return current;
       }
@@ -160,6 +164,8 @@ export class BackendClient {
         });
       } catch (error) {
         if (error instanceof AppError && error.status === 401) {
+          // Refresh authentication failures mean the backend token family can no
+          // longer be trusted, so the opaque application session must also end.
           await this.sessions.delete(sid);
         }
 
