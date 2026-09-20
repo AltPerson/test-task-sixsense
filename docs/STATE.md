@@ -26,7 +26,7 @@ Keep this file short. Replace stale facts instead of appending a diary.
 - During T8, all backend source/tests are off-limits; investigate through the application only.
 
 ## Active task
-T8 complete - UI-only forensic investigation awaiting the mandatory human review gate.
+T9 implementation complete - final README and release verification awaiting the mandatory human submission review.
 
 ## Known blockers
 - Docker startup is not currently usable because the Docker Desktop engine is unavailable. Independently, `backend/Dockerfile` and the backend package metadata reference the missing supplied `backend/README.md`, so both the image build and a normal project install remain defective without changing supplied backend files.
@@ -70,6 +70,9 @@ T8 complete - UI-only forensic investigation awaiting the mandatory human review
 - T8 UI-only investigation identified `ws-hb-009.quillmere.example` (`10.20.40.18`) as the compromised host. The earliest defensible chain begins with a look-alike-domain spearphishing attachment at 2025-10-25 05:00:58 Europe/Kyiv, followed by rare-domain DNS from the host at 06:11:38 and periodic high-risk TLS from 06:26:56.
 - The serialized host search and stable phishing/DNS/TLS session links were reopened in a fresh browser tab and returned the intended evidence without a job ID. Reachable retained jobs were explicitly released; two jobs orphaned by a full-page browser restart were allowed to expire because stable URLs intentionally cannot recover their temporary IDs.
 - T8 evidence came only from the running frontend and its browser-visible BFF data. No backend source, tests, fixtures, generators, direct backend requests, or forensic spoiler sources were inspected.
+- T9 release verification: locked backend runtime dependency sync and frontend `npm ci` passed; backend health and frontend shell returned HTTP 200; lint, typecheck, all 131 tests, and the production build passed.
+- T9 real-browser smoke: analyst login, final search-permalink hydration, completed results containing the documented DNS/TLS evidence, stable DNS and phishing session links, and explicit search-slot release passed against the supplied backend.
+- The root README now preserves the assignment text and adds verified PowerShell setup, architecture/security notes, implemented and omitted scope, test guidance, UI-derived forensic reproduction, API observations, limitations, and an AI-use disclosure.
 
 ## Next action
-Human reviews and independently explains the T8 evidence chain in `docs/INVESTIGATION.md`, confirms or corrects the forensic conclusion, and explicitly approves T9. Do not start T9 before that approval.
+Human performs the final submission gate: follow the README from a clean checkout, inspect the complete diff and browser-visible token boundary, review the AI disclosure and forensic wording, confirm commit history, then decide whether to commit and submit.

@@ -282,7 +282,7 @@ Suggested commit: `docs: document forensic finding`
 ---
 
 ## T9 — README and final review
-Status: TODO
+Status: DONE - awaiting final human submission review
 
 Read: `docs/README_CHECKLIST.md`, `docs/INVESTIGATION.md`
 

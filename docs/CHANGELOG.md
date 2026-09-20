@@ -2,6 +2,11 @@
 
 Milestone-level entries only. Newest first.
 
+## Final submission documentation and release verification
+- Extended the original assignment README with verified PowerShell setup, reviewer workflows, architecture/security trade-offs, test guidance, API observations, deliberate omissions, and AI-use disclosure.
+- Added the approved UI-derived forensic conclusion, reproducible host-search permalink, stable session evidence links, reproduction steps, false lead, and explicit uncertainty around attachment execution.
+- Reverified locked dependency installation, backend/frontend health, all frontend quality gates, permalink hydration, evidence results, stable session links, and explicit search cleanup against the supplied backend.
+
 ## UI-only forensic investigation
 - Identified the compromised host through a reproducible UI search and correlated spearphishing, rare-domain DNS, and periodic high-risk TLS evidence without inspecting backend spoiler sources.
 - Recorded stable session links, a fresh-tab-verified search permalink, timestamps, supporting details, and a concrete attachment-based false lead in the investigation log.
