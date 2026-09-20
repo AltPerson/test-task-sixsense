@@ -245,6 +245,8 @@ From `frontend/` all available project commands must pass:
 - tests
 - production build
 
+When the supplied backend is runnable, verify relevant API-facing changes against it. Use mocks for deterministic rare, error, and concurrency paths, but do not treat mocked tests as proof of real integration.
+
 Manual checks:
 - browser HAR contains no backend access/refresh token;
 - analyst can sign in, search, see rows before completion, page through results, and open a session;
