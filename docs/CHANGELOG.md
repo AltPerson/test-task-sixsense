@@ -2,6 +2,11 @@
 
 Milestone-level entries only. Newest first.
 
+## Session detail and protocol rendering
+- Added authenticated session-detail and protocol-schema BFF routes with opaque decimal-string ID validation, public-field whitelisting, and recursive redaction sanitization.
+- Added stable session evidence URLs, readable flow/risk/detection/file/PCAP summaries, a DNS-focused renderer, and schema-driven generic protocol fields with undeclared-value visibility.
+- Added reproducible return/host pivots without job IDs or automatic searches, plus deterministic error/race/account-isolation coverage and real-backend deep-link verification after job release.
+
 ## Progressive search results and host pivots
 - Added an authenticated results BFF route plus a pure bounded accumulator for cursor progression, caught-up tail polling, string-ID deduplication, and stale-job isolation.
 - Added a metadata-driven TanStack Table with virtualized rows, column selection, progressive/empty/error states, and safe fallback rendering for unexpected values.

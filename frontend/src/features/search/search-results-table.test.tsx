@@ -150,8 +150,11 @@ describe("SearchResultsTable", () => {
         { field: "src.ip", operator: "eq", values: ["192.0.2.44"] },
       ],
     });
-    expect(screen.queryByRole("link", { name: "Open session" })).not.toBeInTheDocument();
-    expect(screen.getByText("Details not available yet")).toBeVisible();
+    const sessionLink = screen.getByRole("link", { name: /Open session/ });
+    expect(sessionLink).toHaveAttribute("target", "_blank");
+    const sessionUrl = new URL(sessionLink.getAttribute("href") ?? "", "http://app.test");
+    expect(sessionUrl.pathname).toBe("/sessions/9007199254740993");
+    expect(sessionUrl.searchParams.get("q")).toBe(encodeSearchDefinition(definition));
     expect(screen.getByText("ID 9007199254740993")).toBeVisible();
   });
 

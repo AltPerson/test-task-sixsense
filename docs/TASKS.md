@@ -178,7 +178,7 @@ Suggested commit: `feat: stream paged search results into virtual table`
 ---
 
 ## T6 — Session detail and protocol rendering
-Status: TODO
+Status: DONE
 
 Read: `docs/ARCHITECTURE.md` Session detail, `docs/API_NOTES.md` Session detail
 

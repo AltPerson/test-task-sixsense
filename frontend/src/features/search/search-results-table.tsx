@@ -65,6 +65,16 @@ function pivotUrl(
   return `${pathname}?${parameters.toString()}`;
 }
 
+function sessionUrl(
+  sessionId: string,
+  definition: SearchDefinition | null,
+): string {
+  const path = `/sessions/${encodeURIComponent(sessionId)}`;
+  return definition
+    ? `${path}?${new URLSearchParams({ q: encodeSearchDefinition(definition) })}`
+    : path;
+}
+
 function sortLabel(sort: SortKey): string {
   return {
     "-ts": "Newest first",
@@ -215,9 +225,15 @@ export function SearchResultsTable({
         header: "Session",
         cell: (context) => (
           <div className="text-xs text-slate-600">
-            <span className="block font-semibold text-slate-700">
-              Details not available yet
-            </span>
+            <Link
+              className="block font-semibold text-sky-700 hover:underline"
+              href={sessionUrl(context.row.original.id, submittedDefinition)}
+              rel="noreferrer"
+              target="_blank"
+            >
+              Open session
+              <span className="sr-only"> in a new tab</span>
+            </Link>
             <span className="block truncate font-mono" title={context.row.original.id}>
               ID {context.row.original.id}
             </span>

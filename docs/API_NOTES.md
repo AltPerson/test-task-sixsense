@@ -118,6 +118,7 @@ When caught up, querying the same tail cursor later may repeat existing tail row
 - other sensors use canonical v2 shape;
 - observer can receive `{ "redacted": true }` in place of sensitive values;
 - malformed session id intentionally returns 404, not validation 422.
+- session retrieval is independent of a temporary search job; a real-backend session deep link remained readable after the originating job was explicitly released.
 
 ## Resilience / chaos
 The simulator can produce:
