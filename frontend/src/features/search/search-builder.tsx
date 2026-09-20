@@ -6,6 +6,7 @@ import { useState, type FormEvent } from "react";
 
 import { ConditionEditor } from "@/features/search/condition-editor";
 import { fetchSearchMetadata } from "@/features/search/search-api";
+import { SearchLifecyclePanel } from "@/features/search/search-lifecycle-panel";
 import type { SearchMetadata } from "@/features/search/metadata";
 import {
   buildSearchCreate,
@@ -18,6 +19,8 @@ import {
   type SearchConditionDefinition,
   type SearchDefinition,
 } from "@/features/search/search-definition";
+import { useSearchLifecycle } from "@/features/search/use-search-lifecycle";
+import type { components } from "@/generated/api";
 
 const SORT_LABELS: Record<(typeof SUPPORTED_SORTS)[number], string> = {
   "-ts": "Newest first",
@@ -84,35 +87,69 @@ function SearchBuilderFromUrl({ metadata }: { metadata: SearchMetadata }) {
   const searchParams = useSearchParams();
   const sharedValue = searchParams.get("q");
   const [preparedLink, setPreparedLink] = useState<PreparedLink | null>(null);
+  const lifecycle = useSearchLifecycle();
 
   // URL navigation remounts the draft, while rerenders under the same URL
   // preserve unsaved edits.
   return (
-    <SearchBuilderForm
-      key={sharedValue ?? "new-search"}
-      metadata={metadata}
-      onInvalidateLink={() => setPreparedLink(null)}
-      onPrepareLink={(query, url) => setPreparedLink({ query, url })}
-      shareUrl={preparedLink?.query === sharedValue ? preparedLink.url : ""}
-      sharedValue={sharedValue}
-    />
+    <div className="space-y-6">
+      <SearchBuilderForm
+        hasPendingSubmission={lifecycle.hasPendingSubmission}
+        isSearchLocked={lifecycle.isLocked}
+        key={sharedValue ?? "new-search"}
+        metadata={metadata}
+        onInvalidateLink={() => setPreparedLink(null)}
+        onPrepareLink={(query, url) => setPreparedLink({ query, url })}
+        onRunSearch={(definition, encodedDefinition) =>
+          void lifecycle.start(definition, encodedDefinition)
+        }
+        shareUrl={preparedLink?.query === sharedValue ? preparedLink.url : ""}
+        sharedValue={sharedValue}
+        submissionQuery={lifecycle.submissionQuery}
+      />
+      <SearchLifecyclePanel
+        hasPendingSubmission={lifecycle.hasPendingSubmission}
+        createError={lifecycle.createError}
+        hasActiveSearch={lifecycle.hasActiveSearch}
+        isPolling={lifecycle.isPolling}
+        job={lifecycle.job}
+        onAbandonPending={lifecycle.abandonPending}
+        onRelease={() => void lifecycle.release()}
+        onRetryPending={() => void lifecycle.retryPending()}
+        onRetryProgress={() => void lifecycle.retryProgress()}
+        phase={lifecycle.phase}
+        progressError={lifecycle.progressError}
+        releaseError={lifecycle.releaseError}
+      />
+    </div>
   );
 }
 
 type SearchBuilderFormProps = {
+  hasPendingSubmission: boolean;
   metadata: SearchMetadata;
   onInvalidateLink: () => void;
   onPrepareLink: (query: string, url: string) => void;
+  onRunSearch: (
+    definition: components["schemas"]["SearchCreate"],
+    encodedDefinition: string,
+  ) => void;
   shareUrl: string;
   sharedValue: string | null;
+  submissionQuery: string | null;
+  isSearchLocked: boolean;
 };
 
 function SearchBuilderForm({
+  hasPendingSubmission,
   metadata,
   onInvalidateLink,
   onPrepareLink,
+  onRunSearch,
   shareUrl,
   sharedValue,
+  submissionQuery,
+  isSearchLocked,
 }: SearchBuilderFormProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -186,6 +223,7 @@ function SearchBuilderForm({
       new URL(relativeUrl, window.location.origin).toString(),
     );
     router.push(relativeUrl, { scroll: false });
+    onRunSearch(result.value, encoded);
   }
 
   async function copyLink() {
@@ -216,7 +254,7 @@ function SearchBuilderForm({
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
               Build a reproducible query from backend-provided fields and
-              sensors. Search execution is added in the next milestone.
+              sensors, then monitor the asynchronous backend job.
             </p>
           </div>
           <p className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600">
@@ -358,10 +396,22 @@ function SearchBuilderForm({
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        {isSearchLocked ? (
+          <p className="mb-5 rounded-lg bg-sky-50 p-3 text-sm text-sky-900">
+            {hasPendingSubmission
+              ? "The previous submission has an unresolved backend outcome. Retry or abandon it below before starting another search."
+              : "A backend search is retained for the submitted definition. Release its slot before starting another search."}
+            {submissionQuery &&
+            submissionQuery !== encodeSearchDefinition(definition)
+              ? " Current edits will apply only to the next run."
+              : ""}
+          </p>
+        ) : null}
         <label className="block max-w-sm text-sm font-medium text-slate-700">
           Sort order
           <select
             className="mt-1.5 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-950"
+            disabled={isSearchLocked}
             onChange={(event) =>
               editDefinition((current) => ({
                 ...current,
@@ -394,10 +444,11 @@ function SearchBuilderForm({
 
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <button
-            className="rounded-lg bg-sky-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-sky-800"
+            className="rounded-lg bg-sky-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={isSearchLocked}
             type="submit"
           >
-            Prepare search link
+            Run search
           </button>
           {shareUrl ? (
             <button
@@ -417,7 +468,7 @@ function SearchBuilderForm({
 
         {shareUrl ? (
           <div className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-900">
-            <p className="font-semibold">Search definition ready</p>
+            <p className="font-semibold">Reproducible search definition</p>
             <p className="mt-1 break-all">{shareUrl}</p>
           </div>
         ) : null}

@@ -78,7 +78,17 @@ export class BackendClient {
     sid: string,
     path: string,
     guard: JsonGuard<T>,
+    init: RequestInit = {},
   ): Promise<T> {
+    const response = await this.requestAuthenticated(sid, path, init);
+    return this.readJson(response, guard);
+  }
+
+  async requestAuthenticated(
+    sid: string,
+    path: string,
+    init: RequestInit = {},
+  ): Promise<Response> {
     let session = await this.requireSession(sid);
 
     // Refresh slightly early so a token does not expire while a request is in flight.
@@ -86,12 +96,20 @@ export class BackendClient {
       session = await this.refreshSession(sid, session.accessToken);
     }
 
-    let response = await this.authorizedRequest(path, session.accessToken);
+    let response = await this.authorizedRequest(
+      path,
+      session.accessToken,
+      init,
+    );
 
     if (response.status === 401) {
       // A protected request gets one reactive refresh and one retry, never a loop.
       session = await this.refreshSession(sid, session.accessToken);
-      response = await this.authorizedRequest(path, session.accessToken);
+      response = await this.authorizedRequest(
+        path,
+        session.accessToken,
+        init,
+      );
 
       if (response.status === 401) {
         await this.sessions.delete(sid);
@@ -102,7 +120,7 @@ export class BackendClient {
       throw await errorFromBackendResponse(response);
     }
 
-    return this.readJson(response, guard);
+    return response;
   }
 
   async logout(sid: string): Promise<void> {
@@ -131,12 +149,15 @@ export class BackendClient {
   private async authorizedRequest(
     path: string,
     accessToken: string,
+    init: RequestInit = {},
   ): Promise<Response> {
+    const headers = new Headers(init.headers);
+    headers.set("authorization", `Bearer ${accessToken}`);
+
     return this.send(path, {
-      method: "GET",
-      headers: {
-        authorization: `Bearer ${accessToken}`,
-      },
+      ...init,
+      method: init.method ?? "GET",
+      headers,
     });
   }
 

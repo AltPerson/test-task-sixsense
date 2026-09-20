@@ -92,7 +92,7 @@ function wrapper({ children }: { children: ReactNode }) {
 function mockMetadataRequests() {
   vi.stubGlobal(
     "fetch",
-    vi.fn((input: RequestInfo | URL) => {
+    vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (url.includes("/api/search/enums/country")) {
         return Promise.resolve(
@@ -103,6 +103,33 @@ function mockMetadataRequests() {
               { value: "US", label: "United States" },
             ],
           }),
+        );
+      }
+
+      if (url.includes("/api/searches")) {
+        if (init?.method === "DELETE") {
+          return Promise.resolve(new Response(null, { status: 204 }));
+        }
+
+        return Promise.resolve(
+          Response.json(
+            {
+              id: "search-1",
+              state: "done",
+              sensorIds: ["sensor-readable"],
+              createdAt: "2026-01-01T10:00:00.000Z",
+              finishedAt: "2026-01-01T10:00:01.000Z",
+              progress: {
+                scannedSessions: 10,
+                totalSessionsEstimate: 10,
+                matched: 2,
+                matchedIsEstimate: false,
+                percent: 100,
+              },
+              warnings: [],
+            },
+            { status: init?.method === "POST" ? 202 : 200 },
+          ),
         );
       }
 
@@ -167,7 +194,7 @@ describe("SearchBuilder", () => {
     const sensor = await screen.findByLabelText(/Readable sensor/);
     fireEvent.click(sensor);
     fireEvent.click(
-      screen.getByRole("button", { name: "Prepare search link" }),
+      screen.getByRole("button", { name: "Run search" }),
     );
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -203,7 +230,7 @@ describe("SearchBuilder", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: "Prepare search link" }),
+      screen.getByRole("button", { name: "Run search" }),
     );
     await waitFor(() => expect(navigation.push).toHaveBeenCalledOnce());
     const [url] = navigation.push.mock.calls[0] as [string];
@@ -260,7 +287,7 @@ describe("SearchBuilder", () => {
     const view = render(<SearchBuilder />, { wrapper });
     await screen.findByText("Readable sensor");
     fireEvent.click(
-      screen.getByRole("button", { name: "Prepare search link" }),
+      screen.getByRole("button", { name: "Run search" }),
     );
     await waitFor(() => expect(navigation.push).toHaveBeenCalledOnce());
     const [url] = navigation.push.mock.calls[0] as [string];
@@ -276,6 +303,8 @@ describe("SearchBuilder", () => {
     expect(
       screen.queryByRole("button", { name: "Copy search link" }),
     ).not.toBeInTheDocument();
-    expect(screen.queryByText("Search definition ready")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Reproducible search definition"),
+    ).not.toBeInTheDocument();
   });
 });

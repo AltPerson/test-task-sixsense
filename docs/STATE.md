@@ -26,7 +26,7 @@ Keep this file short. Replace stale facts instead of appending a diary.
 - During T8, all backend source/tests are off-limits; investigate through the application only.
 
 ## Active task
-Real-backend integration milestone complete after approved T3 — awaiting human review before T4.
+T4 complete — asynchronous search lifecycle awaiting mandatory human review.
 
 ## Known blockers
 - Docker startup is not currently usable because the Docker Desktop engine is unavailable. Independently, `backend/Dockerfile` and the backend package metadata reference the missing supplied `backend/README.md`, so both the image build and a normal project install remain defective without changing supplied backend files.
@@ -44,7 +44,7 @@ Real-backend integration milestone complete after approved T3 — awaiting human
 - dev server: HTTP 200 with application shell
 - lint: passing
 - typecheck: passing
-- tests: 31 passing, including enum retry timing, bounded failure, account-switch cache isolation, URL navigation, and capture-aware defaults
+- tests: 53 passing, including idempotency reuse across automatic and manual recovery, ambiguous failures, timeouts, bounded polling, lifecycle races, rejected best-effort cleanup, enum retry timing, account isolation, and URL navigation
 - build: passing
 - Direct supplied-backend smoke: health, login, profile, sensors, fields, columns, enum, logout, and post-logout rejection passed; observed 200, 204, 401, 404, 422, and recoverable 503 with `Retry-After`.
 - Real-backend refresh: two consecutive access expiries under `CAP_ACCESS_TTL_S=15` each produced exactly one successful refresh; parallel authenticated requests then succeeded, confirming single-flight refresh and rotated refresh-token persistence.
@@ -52,8 +52,12 @@ Real-backend integration milestone complete after approved T3 — awaiting human
 - Real browser authorization: observer sees two readable sensors and one visible disabled/locked sensor; analyst sees all three readable sensors.
 - Real browser search builder: 29 fields, 14 columns, capture-aware defaults, country enum 503/retry/200, local sensor validation, permalink fresh-tab reconstruction, Back/Forward, and malformed `q` recovery passed without creating a search job.
 - Browser network inspection: client traffic used same-origin `/api/...` BFF routes; login response exposed only the user profile, the browser held only an opaque `sid`, and no backend access or refresh token appeared in inspected responses or browser storage.
-- Mock-only deterministic coverage remains for invalid credentials, HTTP-date 429 countdown, rare error shapes, and refresh concurrency. Real 403 and 429 responses were not deliberately provoked.
+- Mock-only deterministic coverage remains for invalid credentials, HTTP-date login throttling, rare error shapes, and refresh concurrency. Real search 403 and expired-search 410 responses were not deliberately provoked.
+- T4 mock verification: post-commit 503, network ambiguity, create timeout, stable key/exact-body reuse across automatic and manual recovery, unresolved-submission replacement guards, non-retry 403/422/429 creation errors, bounded 429/503 polling, cleanup retry, overlapping create suppression, late-response cleanup, rejected best-effort unmount cleanup, failed state, and 410 rerun guidance passed.
+- T4 real browser verification: one search moved from queued through running to done, polling stopped at done, `sensor_lagging` rendered, the retained slot was released with DELETE, and rerunning the same deep link created a fresh job without exposing a job id in the URL.
+- T4 real API verification: repeating one idempotency key returned 200 with `Idempotent-Replayed: true` and the same search id; three retained searches filled the documented limit, a fourth returned 429, and all three were explicitly deleted.
+- Unresolved submissions are retained only in the mounted browser workspace. A retry uses the original key and exact serialized body; abandoning one permits a genuinely new submission and key. Reload, navigation away, tab closure, network failure, or process termination can lose an unresolved key or prevent best-effort DELETE, so slot cleanup is not guaranteed without a returned job id.
 - forensic investigation: blocked until T1–T7
 
 ## Next action
-Human reviews this real-backend integration milestone. After explicit approval, execute T4 only; no T4 work or search jobs have started.
+Human reviews T4 idempotency lifetime, retry behavior, lifecycle termination, and cleanup. After explicit approval, execute T5 only; do not start the progressive results table before then.

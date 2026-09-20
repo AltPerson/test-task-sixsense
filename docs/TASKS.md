@@ -115,7 +115,7 @@ Suggested commit: `feat: add metadata driven search builder`
 ---
 
 ## T4 — Search job orchestration and resilience
-Status: TODO
+Status: DONE
 
 Read: `AGENTS.md` search invariants, `docs/API_NOTES.md` Search create/polling/results
 

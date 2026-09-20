@@ -2,6 +2,12 @@
 
 Milestone-level entries only. Newest first.
 
+## Asynchronous search lifecycle
+- Added authenticated create, progress, and delete BFF routes without exposing backend credentials.
+- Added stable per-submission idempotency keys retained across bounded automatic and explicit manual recovery attempts, request timeouts, and bounded polling with Retry-After support.
+- Added queued/running/done/failed/cancelled progress UI, capture warnings, expiry and slot-limit guidance, and explicit retained-search cleanup.
+- Added race coverage for overlapping creates, unresolved-submission replacement, late responses, rejected best-effort navigation cleanup, reactive token refresh, and terminal polling.
+
 ## Metadata-driven search builder
 - Added authenticated BFF routes for profile, sensor, field, column, and enum metadata without exposing backend tokens.
 - Added a metadata-driven AND filter builder with readable-sensor enforcement and operator-specific value controls.

@@ -136,6 +136,84 @@ describe("BackendClient", () => {
     ]);
   });
 
+  it("preserves a POST body and idempotency key across a reactive auth retry", async () => {
+    const sessions = new InMemorySessionStore(() => NOW);
+    const sid = await sessions.create(
+      tokenPair({
+        access_token: "current-access-token",
+        access_expires_in: 90,
+      }),
+    );
+    const createRequests: Array<{
+      authorization: string | null;
+      idempotencyKey: string | null;
+      body: BodyInit | null | undefined;
+    }> = [];
+
+    const fetchBackend: BackendFetch = async (input, init) => {
+      const url = new URL(input);
+
+      if (url.pathname === "/v1/auth/refresh") {
+        return Response.json(
+          tokenPair({
+            access_token: "rotated-access-token",
+            access_expires_in: 90,
+            refresh_token: "rotated-refresh-token",
+          }),
+        );
+      }
+
+      if (url.pathname === "/v1/searches") {
+        const headers = new Headers(init?.headers);
+        createRequests.push({
+          authorization: headers.get("authorization"),
+          idempotencyKey: headers.get("idempotency-key"),
+          body: init?.body,
+        });
+
+        if (headers.get("authorization") === "Bearer current-access-token") {
+          return Response.json(
+            { detail: "Access token expired.", code: "access_expired" },
+            { status: 401 },
+          );
+        }
+
+        return Response.json({ id: "search-1" }, { status: 202 });
+      }
+
+      throw new Error(`Unexpected backend request: ${url.pathname}`);
+    };
+    const client = new BackendClient(sessions, {
+      baseUrl: "http://backend.test",
+      fetch: fetchBackend,
+      now: () => NOW,
+    });
+    const body = JSON.stringify({ sensor_ids: ["sensor-1"] });
+
+    const response = await client.requestAuthenticated(sid, "/v1/searches", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "idempotency-key": "stable-submission-key",
+      },
+      body,
+    });
+
+    expect(response.status).toBe(202);
+    expect(createRequests).toEqual([
+      {
+        authorization: "Bearer current-access-token",
+        idempotencyKey: "stable-submission-key",
+        body,
+      },
+      {
+        authorization: "Bearer rotated-access-token",
+        idempotencyKey: "stable-submission-key",
+        body,
+      },
+    ]);
+  });
+
   it("destroys the local session when refresh authentication fails", async () => {
     const sessions = new InMemorySessionStore(() => NOW);
     const sid = await sessions.create(tokenPair());

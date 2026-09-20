@@ -4,6 +4,13 @@ export type PublicApiError = {
   code?: string;
   message: string;
   retryAfterSeconds?: number;
+  issues?: PublicValidationIssue[];
+};
+
+export type PublicValidationIssue = {
+  location: Array<string | number>;
+  message: string;
+  code: string;
 };
 
 function normalizeRetryAfter(value: unknown): number | undefined {
@@ -20,6 +27,36 @@ function retryAfterHeader(response: Response): number | undefined {
   }
 
   return Number.parseInt(value, 10);
+}
+
+function validationIssues(value: unknown): PublicValidationIssue[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const issues: PublicValidationIssue[] = [];
+
+  for (const issue of value) {
+    if (
+      !isRecord(issue) ||
+      !Array.isArray(issue.location) ||
+      !issue.location.every(
+        (part) => typeof part === "string" || typeof part === "number",
+      ) ||
+      typeof issue.message !== "string" ||
+      typeof issue.code !== "string"
+    ) {
+      return undefined;
+    }
+
+    issues.push({
+      location: issue.location,
+      message: issue.message,
+      code: issue.code,
+    });
+  }
+
+  return issues;
 }
 
 export async function readPublicApiError(
@@ -53,5 +90,6 @@ export async function readPublicApiError(
     retryAfterSeconds:
       normalizeRetryAfter(body.error.retry_after_seconds) ??
       retryAfterHeader(response),
+    issues: validationIssues(body.error.issues),
   };
 }
