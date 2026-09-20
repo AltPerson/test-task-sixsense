@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -7,6 +8,7 @@ import { requestLogout } from "@/features/auth/auth-api";
 
 export function LogoutButton() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,6 +18,7 @@ export function LogoutButton() {
 
     try {
       await requestLogout();
+      queryClient.clear();
       router.replace("/login");
       router.refresh();
     } catch {

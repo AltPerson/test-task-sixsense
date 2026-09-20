@@ -4,6 +4,8 @@ import {
   errorFromBackendResponse,
   parseRetryAfter,
 } from "@/server/auth/errors";
+import { errorResponse } from "@/server/http/errors";
+import { readPublicApiError } from "@/lib/http";
 
 describe("parseRetryAfter", () => {
   it("parses seconds and HTTP dates", () => {
@@ -56,6 +58,26 @@ describe("errorFromBackendResponse", () => {
           code: "value_error",
         },
       ],
+    });
+  });
+
+  it("preserves transient retry timing across the BFF boundary", async () => {
+    const backendError = await errorFromBackendResponse(
+      Response.json(
+        { detail: "Catalog is warming.", code: "catalog_warming" },
+        { status: 503, headers: { "retry-after": "2" } },
+      ),
+    );
+    const response = errorResponse(backendError);
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get("retry-after")).toBe("2");
+    await expect(
+      readPublicApiError(response, "Unavailable."),
+    ).resolves.toEqual({
+      code: "catalog_warming",
+      message: "Catalog is warming.",
+      retryAfterSeconds: 2,
     });
   });
 });

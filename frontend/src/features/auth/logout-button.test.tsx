@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -11,6 +12,16 @@ const router = vi.hoisted(() => ({
 vi.mock("next/navigation", () => ({
   useRouter: () => router,
 }));
+
+function renderLogoutButton() {
+  const queryClient = new QueryClient();
+  render(
+    <QueryClientProvider client={queryClient}>
+      <LogoutButton />
+    </QueryClientProvider>,
+  );
+  return queryClient;
+}
 
 describe("LogoutButton", () => {
   beforeEach(() => {
@@ -27,7 +38,7 @@ describe("LogoutButton", () => {
       ),
     );
     vi.stubGlobal("fetch", fetchMock);
-    render(<LogoutButton />);
+    renderLogoutButton();
 
     fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
 
@@ -46,7 +57,7 @@ describe("LogoutButton", () => {
       .mockRejectedValueOnce(new TypeError("Network failure"))
       .mockResolvedValueOnce(new Response(null, { status: 204 }));
     vi.stubGlobal("fetch", fetchMock);
-    render(<LogoutButton />);
+    renderLogoutButton();
 
     fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
 

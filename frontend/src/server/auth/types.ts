@@ -1,9 +1,13 @@
 import type { components } from "@/generated/api";
+import {
+  isUserProfile,
+  type UserProfile,
+} from "@/features/auth/auth-contracts";
 import { isRecord } from "@/lib/validation";
 
 export type LoginCredentials = components["schemas"]["LoginRequest"];
 export type TokenPair = components["schemas"]["TokenPair"];
-export type UserProfile = components["schemas"]["Profile"];
+export { isUserProfile, type UserProfile };
 
 export type SessionRecord = {
   accessToken: string;
@@ -13,27 +17,11 @@ export type SessionRecord = {
   profile: UserProfile;
 };
 
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((item) => typeof item === "string");
-}
-
 export function isLoginCredentials(value: unknown): value is LoginCredentials {
   return (
     isRecord(value) &&
     typeof value.email === "string" &&
     typeof value.password === "string"
-  );
-}
-
-export function isUserProfile(value: unknown): value is UserProfile {
-  return (
-    isRecord(value) &&
-    typeof value.id === "string" &&
-    typeof value.email === "string" &&
-    typeof value.display_name === "string" &&
-    typeof value.role === "string" &&
-    isStringArray(value.permissions) &&
-    isStringArray(value.sensor_ids)
   );
 }
 

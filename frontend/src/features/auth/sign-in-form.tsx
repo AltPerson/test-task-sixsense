@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 
@@ -18,6 +19,7 @@ const DEMO_ACCOUNTS = {
 
 export function SignInForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
@@ -64,6 +66,9 @@ export function SignInForm() {
     const result = await signIn({ email, password });
 
     if (result.ok) {
+      // A successful login may replace another account in the same tab. Never
+      // let account-scoped metadata survive that authentication boundary.
+      queryClient.clear();
       router.replace("/");
       router.refresh();
     } else {

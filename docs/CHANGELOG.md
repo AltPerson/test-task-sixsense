@@ -2,6 +2,12 @@
 
 Milestone-level entries only. Newest first.
 
+## Metadata-driven search builder
+- Added authenticated BFF routes for profile, sensor, field, column, and enum metadata without exposing backend tokens.
+- Added a metadata-driven AND filter builder with readable-sensor enforcement and operator-specific value controls.
+- Added deterministic versioned search URLs, safe hydration and validation, copy support, and fresh-tab reconstruction coverage.
+- Added bounded Retry-After enum recovery, account-scoped query-cache cleanup, capture-aware default ranges, and Back/Forward URL synchronization.
+
 ## Secure sign-in and authenticated shell
 - Added an accessible sign-in screen with explicit analyst and observer demo-account fill actions.
 - Added pending, invalid-credential, backend-unavailable, and rate-limit countdown states.

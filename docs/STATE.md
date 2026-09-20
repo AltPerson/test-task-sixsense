@@ -26,7 +26,7 @@ Keep this file short. Replace stale facts instead of appending a diary.
 - During T8, all backend source/tests are off-limits; investigate through the application only.
 
 ## Active task
-Human review gate after T2 — sign-in, authenticated shell, and auth cleanup.
+T3 complete — metadata-driven, deep-linkable search builder awaiting human review.
 
 ## Known blockers
 - The supplied backend Docker build currently fails because `backend/Dockerfile` copies a missing `backend/README.md`; real-backend auth smoke testing remains pending.
@@ -36,14 +36,15 @@ Human review gate after T2 — sign-in, authenticated shell, and auth cleanup.
 - dev server: HTTP 200 with application shell
 - lint: passing
 - typecheck: passing
-- tests: 13 passing, including rejected-logout retry and preserved rate-limit cooldown regressions
+- tests: 31 passing, including enum retry timing, bounded failure, account-switch cache isolation, URL navigation, and capture-aware defaults
 - build: passing
 - BFF auth smoke test: login, `/api/me`, and logout passing against a contract-shaped mock backend
 - browser-visible token check: mock backend tokens absent from login and `/api/me` responses; cookie is opaque, HttpOnly, SameSite=Lax, Path=/
 - browser sign-in flow: analyst/observer, invalid credentials, HTTP-date rate limit countdown, route protection, narrow layout, and logout passing against a contract-shaped mock backend
 - manual browser HAR token check against the supplied backend: not run
-- search permalink round-trip: not implemented
+- search builder browser smoke test: bounded enum warm-up retry, account switching, capture-aware time range, locked sensors, and BFF-only requests passing against a contract-shaped mock backend
+- search permalink round-trip: copied versioned URL reconstructs state in a fresh tab and responds to Back/Forward navigation without preserving stale prepared links
 - forensic investigation: blocked until T1–T7
 
 ## Next action
-Human reviews the focused T1–T2 cleanup and regression coverage. After explicit approval, execute T3 only.
+Human reviews T3. After explicit approval, execute T4 only; do not create search jobs before then.

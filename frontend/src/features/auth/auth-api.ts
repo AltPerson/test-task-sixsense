@@ -1,4 +1,4 @@
-import { isRecord } from "@/lib/validation";
+import { readPublicApiError } from "@/lib/http";
 
 export type SignInCredentials = {
   email: string;
@@ -14,40 +14,11 @@ export type SignInResult =
   | { ok: true }
   | { ok: false; error: SignInError };
 
-type PublicErrorPayload = {
-  error?: {
-    message?: unknown;
-    retry_after_seconds?: unknown;
-  };
-};
-
-function toPublicErrorPayload(value: unknown): PublicErrorPayload {
-  if (!isRecord(value) || !isRecord(value.error)) {
-    return {};
-  }
-
-  return {
-    error: {
-      message: value.error.message,
-      retry_after_seconds: value.error.retry_after_seconds,
-    },
-  };
-}
-
 async function normalizeSignInError(response: Response): Promise<SignInError> {
-  let payload: PublicErrorPayload = {};
-
-  try {
-    payload = toPublicErrorPayload(await response.json());
-  } catch {
-    // Status-specific fallbacks keep malformed error responses actionable.
-  }
-
-  const retryAfter = payload.error?.retry_after_seconds;
-  const retryAfterSeconds =
-    typeof retryAfter === "number" && Number.isFinite(retryAfter)
-      ? Math.max(0, Math.ceil(retryAfter))
-      : undefined;
+  const error = await readPublicApiError(
+    response,
+    "Sign-in could not be completed. Try again.",
+  );
 
   if (response.status === 401) {
     return { message: "Email or password is incorrect." };
@@ -56,16 +27,13 @@ async function normalizeSignInError(response: Response): Promise<SignInError> {
   if (response.status === 429) {
     return {
       message: "Too many sign-in attempts.",
-      retryAfterSeconds,
+      retryAfterSeconds: error.retryAfterSeconds,
     };
   }
 
   return {
-    message:
-      typeof payload.error?.message === "string"
-        ? payload.error.message
-        : "Sign-in could not be completed. Try again.",
-    retryAfterSeconds,
+    message: error.message,
+    retryAfterSeconds: error.retryAfterSeconds,
   };
 }
 

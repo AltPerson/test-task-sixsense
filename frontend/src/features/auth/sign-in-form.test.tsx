@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -12,6 +13,15 @@ vi.mock("next/navigation", () => ({
   useRouter: () => router,
 }));
 
+function renderSignInForm(queryClient = new QueryClient()) {
+  render(
+    <QueryClientProvider client={queryClient}>
+      <SignInForm />
+    </QueryClientProvider>,
+  );
+  return queryClient;
+}
+
 describe("SignInForm", () => {
   beforeEach(() => {
     router.replace.mockReset();
@@ -22,7 +32,7 @@ describe("SignInForm", () => {
   it("fills demo credentials without submitting", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    render(<SignInForm />);
+    renderSignInForm();
 
     fireEvent.click(screen.getByRole("button", { name: "Use analyst" }));
 
@@ -51,7 +61,7 @@ describe("SignInForm", () => {
         ),
       ),
     );
-    render(<SignInForm />);
+    renderSignInForm();
 
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "wrong@example.test" },
@@ -82,7 +92,7 @@ describe("SignInForm", () => {
         ),
       ),
     );
-    render(<SignInForm />);
+    renderSignInForm();
 
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "user@example.test" },
@@ -112,7 +122,7 @@ describe("SignInForm", () => {
       ),
     );
     vi.stubGlobal("fetch", fetchMock);
-    render(<SignInForm />);
+    renderSignInForm();
 
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "rate-limited@example.test" },
@@ -154,7 +164,7 @@ describe("SignInForm", () => {
         }),
       ),
     );
-    render(<SignInForm />);
+    renderSignInForm();
 
     fireEvent.change(screen.getByLabelText("Email"), {
       target: { value: "ana@quillmere.example" },
@@ -166,5 +176,34 @@ describe("SignInForm", () => {
 
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"));
     expect(router.refresh).toHaveBeenCalledOnce();
+  });
+
+  it("clears account-scoped queries when another account signs in", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        Response.json({
+          user: {
+            id: "observer-1",
+            email: "oli@quillmere.example",
+            display_name: "Oli",
+            role: "observer",
+            permissions: [],
+            sensor_ids: ["observer-sensor"],
+          },
+        }),
+      ),
+    );
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(["search-metadata"], {
+      profile: { id: "analyst-1", sensor_ids: ["analyst-sensor"] },
+    });
+    renderSignInForm(queryClient);
+
+    fireEvent.click(screen.getByRole("button", { name: "Use observer" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/"));
+    expect(queryClient.getQueryData(["search-metadata"])).toBeUndefined();
   });
 });

@@ -15,6 +15,7 @@ import {
   type TokenPair,
   type UserProfile,
 } from "@/server/auth/types";
+import type { JsonGuard } from "@/lib/validation";
 
 export type BackendFetch = (
   input: string | URL,
@@ -27,8 +28,6 @@ type BackendClientOptions = {
   now?: () => number;
   accessExpirySkewMs?: number;
 };
-
-type JsonGuard<T> = (value: unknown) => value is T;
 
 const JSON_HEADERS = {
   "content-type": "application/json",
@@ -61,7 +60,7 @@ export class BackendClient {
   }
 
   async getProfile(sid: string): Promise<UserProfile> {
-    const profile = await this.authorizedJson(
+    const profile = await this.getAuthenticatedJson(
       sid,
       "/v1/me",
       isUserProfile,
@@ -75,30 +74,7 @@ export class BackendClient {
     return profile;
   }
 
-  async logout(sid: string): Promise<void> {
-    const session = await this.sessions.get(sid);
-
-    if (!session) {
-      return;
-    }
-
-    const response = await this.request("/v1/auth/logout", {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${session.accessToken}`,
-      },
-    });
-
-    if (response.status !== 204) {
-      throw new AppError(
-        502,
-        "invalid_backend_response",
-        "The backend returned an unexpected logout response.",
-      );
-    }
-  }
-
-  private async authorizedJson<T>(
+  async getAuthenticatedJson<T>(
     sid: string,
     path: string,
     guard: JsonGuard<T>,
@@ -127,6 +103,29 @@ export class BackendClient {
     }
 
     return this.readJson(response, guard);
+  }
+
+  async logout(sid: string): Promise<void> {
+    const session = await this.sessions.get(sid);
+
+    if (!session) {
+      return;
+    }
+
+    const response = await this.request("/v1/auth/logout", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${session.accessToken}`,
+      },
+    });
+
+    if (response.status !== 204) {
+      throw new AppError(
+        502,
+        "invalid_backend_response",
+        "The backend returned an unexpected logout response.",
+      );
+    }
   }
 
   private async authorizedRequest(

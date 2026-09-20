@@ -77,7 +77,7 @@ Suggested commit: `feat: implement secure sign in flow`
 ---
 
 ## T3 — Metadata-driven, deep-linkable search builder
-Status: TODO
+Status: DONE
 
 Read: `docs/API_NOTES.md` (Sensors, Metadata, Search create), `docs/ARCHITECTURE.md` (Search builder, URL strategy)
 
