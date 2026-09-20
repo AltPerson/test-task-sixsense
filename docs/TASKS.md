@@ -245,7 +245,7 @@ Suggested commit: `test: cover search and auth edge cases`
 ---
 
 ## T8 — Manual forensic investigation through the UI
-Status: BLOCKED pending T7 human approval
+Status: DONE
 
 Read: `docs/INVESTIGATION.md`
 

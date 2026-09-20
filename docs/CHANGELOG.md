@@ -2,6 +2,11 @@
 
 Milestone-level entries only. Newest first.
 
+## UI-only forensic investigation
+- Identified the compromised host through a reproducible UI search and correlated spearphishing, rare-domain DNS, and periodic high-risk TLS evidence without inspecting backend spoiler sources.
+- Recorded stable session links, a fresh-tab-verified search permalink, timestamps, supporting details, and a concrete attachment-based false lead in the investigation log.
+- Released every retained search still reachable in the UI and documented the navigation-loss cleanup limitation for orphaned temporary job IDs.
+
 ## Cross-cutting hardening and deep-link verification
 - Added bounded, `Retry-After`-aware GET recovery and request timeouts for metadata, results, session details, and protocol schemas, including deterministic truncated-response coverage.
 - Preserved protected deep links through sign-in with validated internal return targets, while keeping the server layout authoritative for session validity.

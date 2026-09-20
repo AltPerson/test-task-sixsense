@@ -26,7 +26,7 @@ Keep this file short. Replace stale facts instead of appending a diary.
 - During T8, all backend source/tests are off-limits; investigate through the application only.
 
 ## Active task
-T7 complete — cross-cutting hardening awaiting the mandatory human review gate.
+T8 complete - UI-only forensic investigation awaiting the mandatory human review gate.
 
 ## Known blockers
 - Docker startup is not currently usable because the Docker Desktop engine is unavailable. Independently, `backend/Dockerfile` and the backend package metadata reference the missing supplied `backend/README.md`, so both the image build and a normal project install remain defective without changing supplied backend files.
@@ -67,7 +67,9 @@ T7 complete — cross-cutting hardening awaiting the mandatory human review gate
 - T7 review smoke: a deliberately stale `sid` preserved the requested string-ID evidence URL through authoritative layout rejection and analyst login. After feature-folder organization, login, session details, a 3,406-row search result flow, explicit job release, and logout passed against the supplied backend.
 - Feature code is grouped under `auth/{api,model,ui}`, `search/{api,hooks,model,ui}`, and `session/{api,model,ui}`. Route handlers remain in `src/app/api`, server auth remains in `src/server`, and tests stay beside their components, hooks, transport, or model modules.
 - T7 browser security inspection: all observed application requests stayed on same-origin `/api/...`; `/api/me` returned only the public profile, browser storage held only an opaque `sid`, and no backend access/refresh token appeared in inspected traffic or storage.
-- forensic investigation: blocked pending explicit human approval of the T7 gate
+- T8 UI-only investigation identified `ws-hb-009.quillmere.example` (`10.20.40.18`) as the compromised host. The earliest defensible chain begins with a look-alike-domain spearphishing attachment at 2025-10-25 05:00:58 Europe/Kyiv, followed by rare-domain DNS from the host at 06:11:38 and periodic high-risk TLS from 06:26:56.
+- The serialized host search and stable phishing/DNS/TLS session links were reopened in a fresh browser tab and returned the intended evidence without a job ID. Reachable retained jobs were explicitly released; two jobs orphaned by a full-page browser restart were allowed to expire because stable URLs intentionally cannot recover their temporary IDs.
+- T8 evidence came only from the running frontend and its browser-visible BFF data. No backend source, tests, fixtures, generators, direct backend requests, or forensic spoiler sources were inspected.
 
 ## Next action
-Human runs the mandatory T7 review: inspect HAR/token safety and verify copied search and stable session links in a fresh browser context. T8 and the forensic investigation remain blocked until explicit approval.
+Human reviews and independently explains the T8 evidence chain in `docs/INVESTIGATION.md`, confirms or corrects the forensic conclusion, and explicitly approves T9. Do not start T9 before that approval.

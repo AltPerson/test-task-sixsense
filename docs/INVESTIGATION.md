@@ -127,3 +127,90 @@ Keep final README prose concise. The investigation log can be more detailed, but
 - one sentence on a plausible false lead that was ruled out.
 
 Do not overstate certainty beyond what the UI evidence supports.
+
+## Investigation status
+Status: COMPLETE - pending human confirmation at the T8 review gate
+
+All timestamps below are the application-displayed Europe/Kyiv local time. On 2025-10-25 this is UTC+03:00; the serialized search URLs retain UTC timestamps.
+
+### Method and scope
+- Signed in as the documented analyst account and used only the running frontend, its search builder, result sorting, pivots, session inspector, and browser-visible same-origin BFF responses.
+- Established a baseline with an all-sensor latest-hour search, then expanded the candidate host over the approximately three-day capture window to distinguish routine destinations from changed behavior.
+- Narrowed the candidate by source IP and destination IP, inspected the oldest matching events, and separately searched SMTP traffic sorted by risk to look for a preceding delivery vector.
+- Treated detections and risk reasons as leads rather than conclusions, then checked chronology, repetition, certificate details, and unrelated attachment traffic before confirming the host finding.
+
+Search path:
+1. All readable sensors, latest hour, no condition; highest-risk rows exposed repeated TLS activity from `ws-hb-009`.
+2. Source IP `10.20.40.18`, full capture window; normal DNS/NTP/HTTP/TLS traffic established the earlier baseline.
+3. Source IP `10.20.40.18` plus destination IP `203.0.113.201`, full capture window; oldest-first results established the first observed callback at 06:26:56.
+4. Source IP `10.20.40.18`, 04:50-07:10 local on 2025-10-25; oldest-first results exposed the DNS-to-TLS sequence.
+5. Protocol SMTP, full capture window; highest-risk-first results exposed the preceding look-alike-domain attachment and provided benign attachment traffic for comparison.
+
+### Candidate A
+Host: `ws-hb-009.quillmere.example` (`10.20.40.18`), observed on `harbor-branch`
+
+Search URL: <http://127.0.0.1:3000/?q=%7B%22version%22%3A1%2C%22from%22%3A%222025-10-25T01%3A50%3A00.000Z%22%2C%22to%22%3A%222025-10-25T04%3A10%3A00.000Z%22%2C%22sensorIds%22%3A%5B%22dc-east%22%2C%22harbor-branch%22%2C%22hq-core%22%5D%2C%22conditions%22%3A%5B%7B%22field%22%3A%22src.ip%22%2C%22operator%22%3A%22eq%22%2C%22values%22%3A%5B%2210.20.40.18%22%5D%7D%5D%2C%22sort%22%3A%22-ts%22%7D>
+
+Why investigated:
+- A broad three-sensor search sorted by risk showed repeated high-risk TLS connections from this host to `203.0.113.201:443` with SNI `telemetry.static-assets-cdn.test`.
+- The connections repeated at roughly five-to-six-minute intervals and used a self-signed certificate whose CN did not match the SNI.
+
+Evidence observed:
+- At 05:00:58 (02:00:58Z), SMTP session `72057635687366660` delivered `Zollbescheid_Nachzahlung.xlsm` from `billing@quillrnere-freight.example` to `jarek.bellmark@quillmere.example`. The UI identified the look-alike sender domain, scored it 59/medium, and mapped it to MITRE T1566.001 (Spearphishing Attachment). The macro-enabled attachment SHA-256 is `d38d25b4b17ce2eb123b0e670f81d039738fbd20f420371d4df30050a2c0eda0`.
+- At 06:11:38 (03:11:38Z), `ws-hb-009` first resolved the rare domain `telemetry.static-assets-cdn.test` to `203.0.113.201` in DNS session `216172823837671425`. Two related randomized subdomains returned NXDOMAIN at 06:11:48 and 06:12:02.
+- At 06:26:56 (03:26:56Z), the first observed TLS connection from `ws-hb-009` to `203.0.113.201:443` appeared in session `216172823853400065`. It scored 71/high for a self-signed certificate, CN/SNI mismatch, and rare domain.
+- Further TLS connections appeared at 06:32:48, 06:38:54, 06:44:40, 06:50:16, 06:55:24, 07:00:50, and 07:06:52. A later representative session, `216172827724742663`, was explicitly detected as `Periodic TLS beacon` with high severity and MITRE T1071.001.
+- Earlier traffic from the same host showed ordinary DNS, NTP, HTTP, and TLS activity to common internal and external destinations; the rare-domain DNS and periodic TLS sequence represented a distinct behavioral change.
+
+Outcome: CONFIRMED
+
+Reason:
+- The phishing attachment, subsequent rare-domain DNS sequence, and sustained periodic TLS behavior form a chronological, cross-protocol sequence consistent with the intrusion. The compromise conclusion for `ws-hb-009` rests directly on its DNS and periodic TLS behavior and does not rely on one risk score or the earliest row alone.
+
+### Candidate B
+Lead: A legitimate-looking SMTP message with an attachment, session `72057639635255317`
+
+Why investigated:
+- The broad SMTP search showed a message from `orders@portauthority.example.org` to `orla.dalmoor@quillmere.example` with an attachment, which superficially resembled the phishing delivery pattern.
+
+Evidence observed:
+- The session carried `rates-q3.xlsx`, used the expected `portauthority.example.org` sender domain, scored 10/low with no risk reasons, and had no detections.
+- The inspected session exposed no detection or suspicious risk reason, and no UI evidence inspected during this investigation connected it to the candidate host's rare-domain or periodic TLS sequence.
+
+Outcome: RULED OUT
+
+Reason:
+- An attachment alone was insufficient. Unlike Candidate A, this message had no look-alike-domain signal, no macro-enabled filename, no detection, and no correlated network sequence.
+
+### Final finding
+Compromised host: `ws-hb-009.quillmere.example` (`10.20.40.18`)
+
+Earliest defensible suspicious point: the phishing attachment delivered at 2025-10-25 05:00:58 local (02:00:58Z). The earliest suspicious activity directly emitted by the compromised host is the rare-domain DNS lookup at 06:11:38 local (03:11:38Z).
+
+Reproducible host search URL: <http://127.0.0.1:3000/?q=%7B%22version%22%3A1%2C%22from%22%3A%222025-10-25T01%3A50%3A00.000Z%22%2C%22to%22%3A%222025-10-25T04%3A10%3A00.000Z%22%2C%22sensorIds%22%3A%5B%22dc-east%22%2C%22harbor-branch%22%2C%22hq-core%22%5D%2C%22conditions%22%3A%5B%7B%22field%22%3A%22src.ip%22%2C%22operator%22%3A%22eq%22%2C%22values%22%3A%5B%2210.20.40.18%22%5D%7D%5D%2C%22sort%22%3A%22-ts%22%7D>
+
+Phishing session URL: <http://127.0.0.1:3000/sessions/72057635687366660?q=%7B%22version%22%3A1%2C%22from%22%3A%222025-10-24T16%3A00%3A00.000Z%22%2C%22to%22%3A%222025-10-27T17%3A04%3A00.000Z%22%2C%22sensorIds%22%3A%5B%22dc-east%22%2C%22harbor-branch%22%2C%22hq-core%22%5D%2C%22conditions%22%3A%5B%7B%22field%22%3A%22protocol%22%2C%22operator%22%3A%22eq%22%2C%22values%22%3A%5B%22smtp%22%5D%7D%5D%2C%22sort%22%3A%22-ts%22%7D>
+
+Earliest host-evidence session URL: <http://127.0.0.1:3000/sessions/216172823837671425?q=%7B%22version%22%3A1%2C%22from%22%3A%222025-10-25T01%3A50%3A00.000Z%22%2C%22to%22%3A%222025-10-25T04%3A10%3A00.000Z%22%2C%22sensorIds%22%3A%5B%22dc-east%22%2C%22harbor-branch%22%2C%22hq-core%22%5D%2C%22conditions%22%3A%5B%7B%22field%22%3A%22src.ip%22%2C%22operator%22%3A%22eq%22%2C%22values%22%3A%5B%2210.20.40.18%22%5D%7D%5D%2C%22sort%22%3A%22-ts%22%7D>
+
+Earliest beacon session URL: <http://127.0.0.1:3000/sessions/216172823853400065?q=%7B%22version%22%3A1%2C%22from%22%3A%222025-10-25T01%3A50%3A00.000Z%22%2C%22to%22%3A%222025-10-25T04%3A10%3A00.000Z%22%2C%22sensorIds%22%3A%5B%22dc-east%22%2C%22harbor-branch%22%2C%22hq-core%22%5D%2C%22conditions%22%3A%5B%7B%22field%22%3A%22src.ip%22%2C%22operator%22%3A%22eq%22%2C%22values%22%3A%5B%2210.20.40.18%22%5D%7D%5D%2C%22sort%22%3A%22-ts%22%7D>
+
+Correlation:
+- A look-alike-domain spearphishing message delivered a macro-enabled spreadsheet before the host's behavior changed; the UI timeline supports this as the likely delivery vector but does not prove execution on the workstation.
+- The host then resolved a rare telemetry-themed domain, generated related NXDOMAIN lookups, and began periodic high-risk TLS communication with the resolved address.
+- Repetition, certificate anomalies, and the later explicit periodic-beacon detection distinguish the sequence from isolated noisy traffic.
+
+Ruled out:
+- The `portauthority.example.org` spreadsheet message was a plausible attachment-based false lead, but it remained low risk, generated no detection, and had no correlated follow-up activity.
+
+### Verification notes
+- Reproduction: sign in as analyst, open the host-search permalink, select **Run search**, wait for completion, and select the **Start** column for oldest-first order. The first rows are the 06:11 DNS sequence, followed by TLS callbacks beginning at 06:26:56. Open the string-ID session links for decoded evidence.
+- The host-search permalink was opened in a fresh browser tab, reconstructed the same sensors, time range, and source-IP filter, and returned the DNS and TLS evidence again when run.
+- The phishing session URL was opened in a fresh tab after its search job had been released and still loaded the intended string-ID session.
+- Every search job still reachable in the investigation UI was explicitly released after use. Two jobs abandoned by an earlier full-page browser restart could not be reconciled by the UI because job IDs are intentionally absent from stable URLs; they passed the documented 10-minute idle expiry before completion, and no cleanup guarantee is claimed for that navigation-loss case.
+- No backend source, backend tests, fixtures, generators, or direct backend API calls were used.
+
+### Uncertainties and limitations
+- The UI evidence strongly supports `ws-hb-009` as compromised, but it does not expose an asset-to-user directory or endpoint execution telemetry. The association between the phishing recipient and that workstation, and execution of the attachment, remain timeline-based inferences rather than directly observed facts.
+- The first observed TLS callback is not treated as the start of compromise. The SMTP delivery is the earliest suspicious event in the correlated timeline, while the 06:11:38 DNS lookup is the earliest suspicious event directly emitted by the host.
+- PCAP was already expired for the inspected historical sessions, so the conclusion uses decoded session fields, detections, risk reasons, and chronology visible in the application.
