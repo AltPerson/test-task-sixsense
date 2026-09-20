@@ -26,7 +26,7 @@ Keep this file short. Replace stale facts instead of appending a diary.
 - During T8, all backend source/tests are off-limits; investigate through the application only.
 
 ## Active task
-T6 complete — session detail and protocol rendering awaiting human review.
+T7 complete — cross-cutting hardening awaiting the mandatory human review gate.
 
 ## Known blockers
 - Docker startup is not currently usable because the Docker Desktop engine is unavailable. Independently, `backend/Dockerfile` and the backend package metadata reference the missing supplied `backend/README.md`, so both the image build and a normal project install remain defective without changing supplied backend files.
@@ -44,7 +44,7 @@ T6 complete — session detail and protocol rendering awaiting human review.
 - dev server: HTTP 200 with application shell
 - lint: passing
 - typecheck: passing
-- tests: 98 passing, including session BFF validation, large string IDs, DNS legacy/canonical rendering, generic schema fields, undeclared/redacted values, stale-detail isolation, account cache clearing, progressive results, idempotency recovery, lifecycle races, and URL navigation
+- tests: 131 passing, including bounded GET retry/recovery, strict post-login return-target validation, missing/stale-cookie deep-link preservation, session BFF validation, large string IDs, DNS legacy/canonical rendering, generic schema fields, stale-detail isolation, progressive results, idempotency recovery, lifecycle races, and URL navigation
 - build: passing
 - Direct supplied-backend smoke: health, login, profile, sensors, fields, columns, enum, logout, and post-logout rejection passed; observed 200, 204, 401, 404, 422, and recoverable 503 with `Retry-After`.
 - Real-backend refresh: two consecutive access expiries under `CAP_ACCESS_TTL_S=15` each produced exactly one successful refresh; parallel authenticated requests then succeeded, confirming single-flight refresh and rotated refresh-token persistence.
@@ -61,7 +61,13 @@ T6 complete — session detail and protocol rendering awaiting human review.
 - T5 real browser verification: a review smoke search loaded 3,252 rows through progressive cursor pages, reached `done`, showed the non-interactive session-detail placeholder with string IDs, and rendered only a virtualized subset of rows. Source-IP pivot URLs retained the search context, the retained job was explicitly deleted with a 204 response, and the browser session was signed out. Deterministic mocks cover terminal timing and redaction because those cases were not deliberately induced against the supplied backend.
 - T6 mock verification: large and malformed string IDs, authenticated session/schema BFF validation, public-field whitelisting, recursive redaction sanitization, loading and 401/403/404/410 states, DNS v1/v2-shaped values, generic/undeclared fields, missing and unexpected values, stale responses, navigation context, account cache clearing, and schema recovery passed.
 - T6 real browser verification: an analyst opened a string-ID session from 3,316 completed results, inspected an SSH summary plus server-declared and undeclared fields, returned to the still-active results tab, and explicitly released the job. The direct session URL still loaded after job release and page reload; it preserved the validated search definition without a job ID or automatic rerun. Same-origin session/schema BFF calls returned 200, the session ID remained a string, and the inspected session response contained no access or refresh token. DNS legacy/canonical, redaction, authorization, expiry, and race paths remain mock-only.
-- forensic investigation: blocked until T1–T7
+- T7 hardening: metadata, results, session, and schema GETs use bounded retries for transient failures, respect `Retry-After`, and abort stalled requests. Accessible labels/status regions and keyboard focus were tightened without changing the search/session contracts. Static audit found no accidental client logs, unsafe HTML rendering, unjustified authored `any`, or client imports from server-only modules.
+- T7 deterministic verification: retry classification/delay, truncated-response recovery, login-loop/external/encoded return-target rejection, search/session permalink acceptance, missing/stale-cookie session-link preservation, and post-login deep-link return passed. Rare network timing and error cases remain mock-only.
+- T7 real browser verification: a clean pre-auth session evidence link returned to the same string-ID session after login; a copied search URL hydrated all sensors and times, launched a fresh job, progressively loaded 3,406/3,406 results, and supported oldest-first server sorting after completion. The job was explicitly released. Observer sensor locking also passed.
+- T7 review smoke: a deliberately stale `sid` preserved the requested string-ID evidence URL through authoritative layout rejection and analyst login. After feature-folder organization, login, session details, a 3,406-row search result flow, explicit job release, and logout passed against the supplied backend.
+- Feature code is grouped under `auth/{api,model,ui}`, `search/{api,hooks,model,ui}`, and `session/{api,model,ui}`. Route handlers remain in `src/app/api`, server auth remains in `src/server`, and tests stay beside their components, hooks, transport, or model modules.
+- T7 browser security inspection: all observed application requests stayed on same-origin `/api/...`; `/api/me` returned only the public profile, browser storage held only an opaque `sid`, and no backend access/refresh token appeared in inspected traffic or storage.
+- forensic investigation: blocked pending explicit human approval of the T7 gate
 
 ## Next action
-Human reviews T6 session routing, redaction boundary, schema rendering, stable navigation, and cache isolation. After approval, execute T7 only; do not start T8 or the forensic investigation.
+Human runs the mandatory T7 review: inspect HAR/token safety and verify copied search and stable session links in a fresh browser context. T8 and the forensic investigation remain blocked until explicit approval.

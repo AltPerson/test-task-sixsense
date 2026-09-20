@@ -188,6 +188,11 @@ The following milestones require a human review before the next task begins, eve
 - Do not comment trivial assignments, ordinary control flow, self-explanatory JSX, or obvious getters.
 - Apply these conventions incrementally to active work; do not repeatedly refactor already accepted code without a concrete finding.
 
+## Feature folder organization
+- Within `frontend/src/features/<feature>/`, group browser BFF transport in `api/`, pure types/validation/transforms in `model/`, React hooks in `hooks/`, and components in `ui/` when each folder has a meaningful cohesive group.
+- Keep each component or hook beside its focused tests. Do not add empty categories, barrel files, or split cohesive modules only to satisfy the folder pattern.
+- Keep shared utilities in `src/lib/`, route handlers in `src/app/api/`, server-only authentication/backend integration in `src/server/`, and generated API types in `src/generated/`.
+
 
 ## Git ownership
 Git history and remote operations are human-controlled.

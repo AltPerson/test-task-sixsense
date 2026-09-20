@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { SearchBuilder } from "@/features/search/search-builder";
+import { SearchBuilder } from "@/features/search/ui/search-builder";
 
 export default function Home() {
   return (

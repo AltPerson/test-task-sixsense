@@ -2,7 +2,7 @@ import type { components } from "@/generated/api";
 import {
   isUserProfile,
   type UserProfile,
-} from "@/features/auth/auth-contracts";
+} from "@/features/auth/model/auth-contracts";
 import { isRecord } from "@/lib/validation";
 
 export type LoginCredentials = components["schemas"]["LoginRequest"];

@@ -7,7 +7,7 @@ import {
   normalizeColumns,
   normalizeFields,
   normalizeSensors,
-} from "@/features/search/metadata";
+} from "@/features/search/model/metadata";
 import { backendClient } from "@/server/auth/dependencies";
 import { withAuthenticatedSession } from "@/server/http/authenticated-route";
 

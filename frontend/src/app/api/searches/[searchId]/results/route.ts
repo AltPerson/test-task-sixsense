@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 import {
   isSearchResultsWire,
   normalizeSearchResults,
-} from "@/features/search/search-results";
-import { SUPPORTED_SORTS } from "@/features/search/search-definition";
+} from "@/features/search/model/search-results";
+import { SUPPORTED_SORTS } from "@/features/search/model/search-definition";
 import { AppError } from "@/server/auth/errors";
 import { backendClient } from "@/server/auth/dependencies";
 import { withAuthenticatedSession } from "@/server/http/authenticated-route";

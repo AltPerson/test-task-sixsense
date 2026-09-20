@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isProtocolSchema } from "@/features/session/session-detail";
+import { isProtocolSchema } from "@/features/session/model/session-detail";
 import { AppError } from "@/server/auth/errors";
 import { backendClient } from "@/server/auth/dependencies";
 import { withAuthenticatedSession } from "@/server/http/authenticated-route";

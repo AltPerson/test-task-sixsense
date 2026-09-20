@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { isEnumCatalog } from "@/features/search/metadata";
+import { isEnumCatalog } from "@/features/search/model/metadata";
 import { backendClient } from "@/server/auth/dependencies";
 import { withAuthenticatedSession } from "@/server/http/authenticated-route";
 

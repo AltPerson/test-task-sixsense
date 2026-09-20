@@ -2,6 +2,13 @@
 
 Milestone-level entries only. Newest first.
 
+## Cross-cutting hardening and deep-link verification
+- Added bounded, `Retry-After`-aware GET recovery and request timeouts for metadata, results, session details, and protocol schemas, including deterministic truncated-response coverage.
+- Preserved protected deep links through sign-in with validated internal return targets, while keeping the server layout authoritative for session validity.
+- Tightened form/table accessibility, audited client/server boundaries and browser-visible auth data, and verified copied search links, stable session links, progressive loading, completed-search sorting, explicit cleanup, and observer sensor authorization against the supplied backend.
+- Restricted return targets to supported search/session pages, rejected login loops and encoded path bypasses, and preserved evidence links after stale opaque cookies without weakening SessionStore validation.
+- Organized feature modules into cohesive API, model, hook, and UI folders while keeping tests beside their implementation and preserving Next.js route/server boundaries.
+
 ## Session detail and protocol rendering
 - Added authenticated session-detail and protocol-schema BFF routes with opaque decimal-string ID validation, public-field whitelisting, and recursive redaction sanitization.
 - Added stable session evidence URLs, readable flow/risk/detection/file/PCAP summaries, a DNS-focused renderer, and schema-driven generic protocol fields with undeclared-value visibility.

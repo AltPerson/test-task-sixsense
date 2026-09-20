@@ -1,7 +1,12 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { LogoutButton } from "@/features/auth/logout-button";
+import {
+  loginPathForReturnTo,
+  RETURN_TO_HEADER,
+} from "@/features/auth/model/return-to";
+import { LogoutButton } from "@/features/auth/ui/logout-button";
 import { getCurrentUser } from "@/server/auth/current-user";
 
 type AuthenticatedLayoutProps = Readonly<{
@@ -11,10 +16,13 @@ type AuthenticatedLayoutProps = Readonly<{
 export default async function AuthenticatedLayout({
   children,
 }: AuthenticatedLayoutProps) {
-  const user = await getCurrentUser();
+  const [user, requestHeaders] = await Promise.all([
+    getCurrentUser(),
+    headers(),
+  ]);
 
   if (!user) {
-    redirect("/login");
+    redirect(loginPathForReturnTo(requestHeaders.get(RETURN_TO_HEADER)));
   }
 
   return (

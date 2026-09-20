@@ -208,7 +208,7 @@ Suggested commit: `feat: add schema driven session inspector`
 ---
 
 ## T7 — Cross-cutting hardening + tests
-Status: TODO
+Status: DONE
 
 Work:
 - audit loading/empty/error states;
@@ -218,6 +218,8 @@ Work:
 - remove accidental logs;
 - run analyzer for client/server import leaks;
 - verify copied search URLs hydrate correctly after a fresh page load;
+- restrict post-login return targets to supported application pages and preserve them when an opaque session cookie is stale;
+- group feature modules by API, model, hook, and UI responsibility where the existing module count justifies it;
 - add at least one more meaningful test if coverage is too narrow.
 
 High-value tests, in priority order:
@@ -233,7 +235,8 @@ Acceptance:
 - no indefinite spinner on terminal/network failure;
 - no authored `any` without justification;
 - copied search link works in a clean/fresh browser tab and can launch a fresh job;
-- stable session links work directly.
+- stable session links work directly, including after a stale opaque cookie is rejected server-side;
+- feature imports preserve the BFF/client/server boundaries after organization.
 
 Human review gate: run the app manually, inspect HAR/token safety, verify deep links in a fresh tab, and explicitly approve starting T8.
 
@@ -242,7 +245,7 @@ Suggested commit: `test: cover search and auth edge cases`
 ---
 
 ## T8 — Manual forensic investigation through the UI
-Status: BLOCKED until T1–T7 are complete
+Status: BLOCKED pending T7 human approval
 
 Read: `docs/INVESTIGATION.md`
 

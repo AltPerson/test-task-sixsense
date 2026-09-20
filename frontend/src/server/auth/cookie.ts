@@ -3,7 +3,9 @@ import "server-only";
 import { cookies } from "next/headers";
 import type { NextResponse } from "next/server";
 
-export const SESSION_COOKIE_NAME = "sid";
+import { SESSION_COOKIE_NAME } from "@/server/auth/cookie-name";
+
+export { SESSION_COOKIE_NAME } from "@/server/auth/cookie-name";
 
 // The cookie carries only an opaque lookup key; backend tokens remain server-only.
 const sessionCookieOptions = {

@@ -1,4 +1,4 @@
-import { SessionInspector } from "@/features/session/session-inspector";
+import { SessionInspector } from "@/features/session/ui/session-inspector";
 
 type SessionPageProps = {
   params: Promise<{ sessionId: string }>;

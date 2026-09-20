@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import Home from "@/app/(app)/page";
 
-vi.mock("@/features/search/search-builder", () => ({
+vi.mock("@/features/search/ui/search-builder", () => ({
   SearchBuilder: () => <h1>Traffic search</h1>,
 }));
 

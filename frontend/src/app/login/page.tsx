@@ -1,13 +1,20 @@
 import { redirect } from "next/navigation";
 
-import { SignInForm } from "@/features/auth/sign-in-form";
+import { SignInForm } from "@/features/auth/ui/sign-in-form";
+import { safeReturnTo } from "@/features/auth/model/return-to";
 import { getCurrentUser } from "@/server/auth/current-user";
 
-export default async function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<{ returnTo?: string | string[] }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const parameters = await searchParams;
+  const returnTo = safeReturnTo(parameters.returnTo);
   const user = await getCurrentUser();
 
   if (user) {
-    redirect("/");
+    redirect(returnTo);
   }
 
   return (
@@ -38,7 +45,7 @@ export default async function LoginPage() {
               Network Traffic Analysis
             </p>
           </div>
-          <SignInForm />
+          <SignInForm returnTo={returnTo} />
         </div>
       </section>
     </main>

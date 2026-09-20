@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import {
   isSearchJobWire,
   normalizeSearchJob,
-} from "@/features/search/search-job";
+} from "@/features/search/model/search-job";
 import { backendClient } from "@/server/auth/dependencies";
 import { withAuthenticatedSession } from "@/server/http/authenticated-route";
 
